@@ -2,7 +2,7 @@ import torch
 import time
 from tqdm.auto import tqdm
 
-def model_training(n_epochs, model, train_loader, val_loader, optimizer, criterion, device):
+def model_training(n_epochs, model, train_loader, val_loader, optimizer, criterion, scheduler, device):
   train_losses = []
   train_accs = []
   val_losses = []
@@ -20,6 +20,9 @@ def model_training(n_epochs, model, train_loader, val_loader, optimizer, criteri
     val_progress_bar = tqdm(val_loader, desc=f"Validation epoch {epoch}/{n_epochs}", leave=False, unit="mini-batch")
     _, _, val_acc, val_loss = eval(model, val_loader, criterion, device, val_progress_bar)
     print(f'\tVal Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.2f}%')
+
+    if (scheduler):
+        scheduler.step(val_loss)
 
     if val_acc > best_val_acc:
         best_val_acc = val_acc
