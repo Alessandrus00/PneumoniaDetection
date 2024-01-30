@@ -1,5 +1,6 @@
 import torch
-from tqdm.auto import tqdm, trange
+import time
+from tqdm.auto import tqdm
 
 def model_training(n_epochs, model, train_loader, val_loader, optimizer, criterion, device):
   train_losses = []
@@ -8,7 +9,8 @@ def model_training(n_epochs, model, train_loader, val_loader, optimizer, criteri
   val_accs = []
   best_val_acc = 0.0
   best_epoch = 0
-
+  
+  start_time = time.time()
   for epoch in range(1, n_epochs + 1):
     train_progress_bar = tqdm(train_loader, desc=f"Training epoch {epoch}/{n_epochs}", leave=False, unit="mini-batch")
     train_acc, train_loss = train(model, train_loader, optimizer, criterion, device, train_progress_bar)
@@ -28,6 +30,26 @@ def model_training(n_epochs, model, train_loader, val_loader, optimizer, criteri
     train_accs.append(train_acc)
     val_losses.append(val_loss)
     val_accs.append(val_acc)
+
+    # Calculate elapsed time and remaining time
+    elapsed_time = time.time() - start_time
+    avg_time_per_epoch = elapsed_time / epoch
+    remaining_epochs = n_epochs - epoch
+    remaining_time = avg_time_per_epoch * remaining_epochs
+
+    # Convert elapsed time in hh:mm:ss
+    elapsed_time_hr, rem = divmod(elapsed_time, 3600)
+    elapsed_time_min, elapsed_time_sec = divmod(rem, 60)
+    
+    # Convert remaining time in hh:mm:ss
+    remaining_time_hr, rem = divmod(remaining_time, 3600)
+    remaining_time_min, remaining_time_sec = divmod(rem, 60)
+
+    # to show also the hour if > 0
+    if elapsed_time_hr > 0:
+        print(f"\tElapsed time: {elapsed_time_hr:.0f}h {elapsed_time_min:.0f}m {elapsed_time_sec:.0f}s, Remaining Time: {remaining_time_hr:.0f}h {remaining_time_min:.0f}m {remaining_time_sec:.0f}s")
+    else:
+        print(f"\tElapsed time: {elapsed_time_min:.0f}m {elapsed_time_sec:.0f}s, Remaining Time: {remaining_time_min:.0f}m {remaining_time_sec:.0f}s")
 
   return train_losses, train_accs, val_losses, val_accs, best_epoch
 
