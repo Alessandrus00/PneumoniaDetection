@@ -45,12 +45,8 @@ def model_training(n_epochs, model, train_loader, val_loader, optimizer, criteri
     remaining_time_hr, rem = divmod(remaining_time, 3600)
     remaining_time_min, remaining_time_sec = divmod(rem, 60)
 
-    # to show also the hour if > 0
-    if elapsed_time_hr > 0:
-        print(f"\tElapsed time: {elapsed_time_hr:.0f}h {elapsed_time_min:.0f}m {elapsed_time_sec:.0f}s, Remaining Time: {remaining_time_hr:.0f}h {remaining_time_min:.0f}m {remaining_time_sec:.0f}s")
-    else:
-        print(f"\tElapsed time: {elapsed_time_min:.0f}m {elapsed_time_sec:.0f}s, Remaining Time: {remaining_time_min:.0f}m {remaining_time_sec:.0f}s")
-
+    print(f"\tElapsed time: {elapsed_time_hr:.0f}h {elapsed_time_min:.0f}m {elapsed_time_sec:.0f}s, Remaining Time: {remaining_time_hr:.0f}h {remaining_time_min:.0f}m {remaining_time_sec:.0f}s")
+    
   return train_losses, train_accs, val_losses, val_accs, best_epoch
 
 
