@@ -114,21 +114,25 @@ def eval(model, data_loader, criterion, device, progress_bar=None):
 
     return true_labels, predicted_labels, float(correct * 100. / total), total_loss / len(data_loader)
 
-# This function can be made more general by allowing for more flexible layer freezing options.
-def freeze(model, classification_layer):
+# Accepts a list of trainable layers. Makes sure that only these layers are not frozen.
+def freeze(model, trainable_layers):
+    
     for param in model.parameters():
       param.requires_grad = False
 
-    for param in classification_layer.parameters():
-      param.requires_grad = True
+    for layer in trainable_layers:
+        for param in layer.parameters():
+          param.requires_grad = True
 
-# Prints the number of total parameters and the number of trainable parameters in the model.
-def params_info(model):
-   total_params = sum(p.numel() for p in model.parameters())
-   print(f'{total_params:,} total parameters.')
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f'{total_params:,} total parameters.')
 
-   total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-   print(f'{total_trainable_params:,} training parameters.')
+    total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f'{total_trainable_params:,} trainable parameters.')
+
+
+
+
 
 
    
