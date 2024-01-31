@@ -121,8 +121,8 @@ def freeze(model, trainable_layers):
       param.requires_grad = False
 
     for layer in trainable_layers:
-        for param in layer.parameters():
-          param.requires_grad = True
+      for param in layer.parameters():
+        param.requires_grad = True
 
     total_params = sum(p.numel() for p in model.parameters())
     print(f'{total_params:,} total parameters.')
