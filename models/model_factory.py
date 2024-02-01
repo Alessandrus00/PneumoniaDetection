@@ -3,7 +3,18 @@ import timm
 import model_functions
 import torch.nn as nn
 
-def get_model(pretrained_model_name, classifier_fn, layers_version, trainable_layers=None):
+# default training configuration
+config = {
+    'batch_size': 128,
+    'val_split': 0.1,
+    'lr': 1e-3,
+    'n_epochs': 10,
+    'image_size': None,
+    'mean': None,
+    'std': None
+    }
+
+def get_model(pretrained_model_name, classifier_fn, layers_version, trainable_layers=None, n_epochs=10):
 
     def set_classifier():
         if pretrained_model_name in ["xception", "resnet50"]:
@@ -17,6 +28,7 @@ def get_model(pretrained_model_name, classifier_fn, layers_version, trainable_la
     config['mean'] = model.default_cfg['mean']
     config['std'] = model.default_cfg['std']
     config['image_size'] = model.default_cfg['input_size'][1]
+    config['n_epochs'] = n_epochs
 
     if trainable_layers is None:
         trainable_layers = predefined_trainable_layers[pretrained_model_name][layers_version](model)
@@ -58,16 +70,6 @@ predefined_trainable_layers = {
         'first': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10],
         'second': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10, model.features.denseblock4.denselayer9, model.features.denseblock4.denselayer8, model.features.denseblock4.denselayer7, model.features.denseblock4.denselayer6],
     }
-}
-
-config = {
-    'batch_size': 128,
-    'val_split': 0.1,
-    'lr': 1e-3,
-    'n_epochs': 10,
-    'image_size': None,
-    'mean': None,
-    'std': None
 }
 
 
