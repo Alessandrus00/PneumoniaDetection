@@ -1,32 +1,45 @@
 # This module creates models for our experiments.
 import timm
-from torchvision.models import resnet50, ResNet50_Weights, densenet121, DenseNet121_Weights
 import model_functions
 import torch.nn as nn
 
 def get_model(pretrained_model_name, classifier_fn, layers_version, trainable_layers=None):
 
-    if pretrained_model_name == "xception":
-        model = timm.create_model(pretrained_model_name, pretrained=True)
-        model.fc = classifier_fn(model.fc.in_features)
-        
-    elif pretrained_model_name == "resnet50":
-        model = resnet50(pretrained=True)
-        model.fc = classifier_fn(model.fc.in_features)
+    def set_classifier():
+        if pretrained_model_name in ["xception", "resnet50"]:
+            model.fc = classifier_fn(model.fc.in_features)
+        else:
+            model.classifier = classifier_fn(model.classifier.in_features)
 
-    elif pretrained_model_name == "densenet121":
-        model = densenet121(pretrained=True)
-        model.classifier = classifier_fn(model.classifier.in_features)
+    model = timm.create_model(pretrained_model_name, pretrained=True)
+    set_classifier()
 
-    else:
-        raise ValueError(f"Unsupported model: {pretrained_model_name}")
+    config['mean'] = model.default_cfg['mean']
+    config['std'] = model.default_cfg['std']
+    config['image_size'] = model.default_cfg['input_size'][1]
 
     if trainable_layers is None:
         trainable_layers = predefined_trainable_layers[pretrained_model_name][layers_version](model)
 
     model_functions.set_trainable_layers(model, trainable_layers)
 
-    return model    
+    return model
+
+def get_linear_classifer(n_inputs, num_classes=2):
+    return nn.Sequential(
+    nn.Linear(n_inputs, num_classes),
+    nn.LogSoftmax(dim=1))
+
+def get_simple_non_linear_classifier(n_inputs, num_classes=2):
+    return nn.Sequential(
+    nn.BatchNorm1d(n_inputs),
+    nn.Linear(n_inputs, n_inputs // 2),
+    nn.ReLU(),
+    nn.BatchNorm1d(n_inputs // 2),
+    nn.Dropout(0.5),
+    nn.Linear(n_inputs // 2, num_classes),
+    nn.LogSoftmax(dim=1) 
+)
 
 # Define a dictionary with functions returning predefined trainable layers for each model and version
 predefined_trainable_layers = {
@@ -47,21 +60,15 @@ predefined_trainable_layers = {
     }
 }
 
-def get_linear_classifer(n_inputs, num_classes=2):
-    return nn.Sequential(
-    nn.Linear(n_inputs, num_classes),
-    nn.LogSoftmax(dim=1))
-
-def get_simple_non_linear_classifier(n_inputs, num_classes=2):
-    return nn.Sequential(
-    nn.BatchNorm1d(n_inputs),
-    nn.Linear(n_inputs, n_inputs // 2),
-    nn.ReLU(),
-    nn.BatchNorm1d(n_inputs // 2),
-    nn.Dropout(0.5),
-    nn.Linear(n_inputs // 2, num_classes),
-    nn.LogSoftmax(dim=1) 
-)
+config = {
+    'batch_size': 128,
+    'val_split': 0.1,
+    'lr': 1e-3,
+    'n_epochs': 4,
+    'image_size': None,
+    'mean': None,
+    'std': None
+}
 
 
 
