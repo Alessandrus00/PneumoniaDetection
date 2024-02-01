@@ -26,6 +26,9 @@ class PneumoniaModel(pl.LightningModule):
         self.model = model
         self.criterion = nn.NLLLoss()
         self.test_outputs = []
+        self.train_outputs = {'train_losses': [], 'train_accs': []}
+        self.val_outputs = {'val_losses': [], 'val_accs': []}
+
 
     def forward(self, x):
         return self.model(x)
@@ -39,6 +42,13 @@ class PneumoniaModel(pl.LightningModule):
         metrics = {"train_loss": loss, "train_acc": acc*100}
         self.log_dict(metrics, on_epoch=True, on_step=True, prog_bar=False)
         return loss
+    
+    def on_train_epoch_end(self):
+        epoch_loss = self.trainer.callback_metrics['train_loss_epoch'].cpu().numpy()
+        epoch_acc = self.trainer.callback_metrics['train_acc_epoch'].cpu().numpy()
+        self.train_outputs['train_losses'].append(epoch_loss)
+        self.train_outputs['train_accs'].append(epoch_acc)
+
 
     def validation_step(self, batch, batch_idx):
         inputs, labels = batch
@@ -48,6 +58,12 @@ class PneumoniaModel(pl.LightningModule):
         metrics = {"val_loss": loss, "val_acc": acc*100}
         self.log_dict(metrics, on_epoch=True, on_step=True, prog_bar=False)
         return metrics
+    
+    def on_validation_epoch_end(self):
+        epoch_loss = self.trainer.callback_metrics['val_loss_epoch'].cpu().numpy()
+        epoch_acc = self.trainer.callback_metrics['val_acc_epoch'].cpu().numpy()
+        self.val_outputs['val_losses'].append(epoch_loss)
+        self.val_outputs['val_accs'].append(epoch_acc)
 
     def on_test_epoch_start(self):
         # initilize test metrics
