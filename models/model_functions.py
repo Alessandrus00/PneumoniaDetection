@@ -115,7 +115,7 @@ def eval(model, data_loader, criterion, device, progress_bar=None):
     return true_labels, predicted_labels, float(correct * 100. / total), total_loss / len(data_loader)
 
 # Accepts a list of trainable layers. Makes sure that only these layers are not frozen.
-def freeze(model, trainable_layers):
+def set_trainable_layers(model, trainable_layers):
     
     for param in model.parameters():
       param.requires_grad = False
