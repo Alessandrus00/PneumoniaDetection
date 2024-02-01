@@ -23,7 +23,7 @@ def get_model(pretrained_model_name, classifier_fn, layers_version, trainable_la
 
     model_functions.set_trainable_layers(model, trainable_layers)
 
-    return model
+    return model, config
 
 def get_linear_classifer(n_inputs, num_classes=2):
     return nn.Sequential(
@@ -64,7 +64,7 @@ config = {
     'batch_size': 128,
     'val_split': 0.1,
     'lr': 1e-3,
-    'n_epochs': 4,
+    'n_epochs': 10,
     'image_size': None,
     'mean': None,
     'std': None
