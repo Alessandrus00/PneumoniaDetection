@@ -1,5 +1,5 @@
 import pytorch_lightning as pl
-import additional.utilities
+import utilities
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
