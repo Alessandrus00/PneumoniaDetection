@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import random
+from torch.utils.data import WeightedRandomSampler
+
 
 def plot_results(n_epochs, train_losses, train_accs, valid_losses, valid_accs):
   N_EPOCHS = n_epochs
@@ -49,3 +51,12 @@ def split_file_names(input_folder, val_split_perc):
     val_filenames = pneumonia_val_filenames + normal_val_filenames
 
     return train_filenames, val_filenames
+    
+
+def create_weighted_sampler(dataset):
+    targets = dataset.targets
+    class_counts = np.bincount(targets)
+    class_weights = 1.0 / class_counts
+    weights = [class_weights[label] for label in targets]
+    sampler = WeightedRandomSampler(weights, len(weights))
+    return sampler
