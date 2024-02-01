@@ -19,6 +19,12 @@ import timm
 import pytorch_lightning as pl
 import logging
 
+# setting up the directories for train, val and test
+data_dir = "chest-xray-pneumonia/chest_xray"
+train_dir = data_dir + "/train/"
+val_dir = data_dir + "/val/"
+test_dir = data_dir + "/test/"
+
 class PneumoniaDataModule(pl.LightningDataModule):
     def __init__(self, h):
         super().__init__()
