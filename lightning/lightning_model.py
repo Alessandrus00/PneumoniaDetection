@@ -80,4 +80,4 @@ class PneumoniaModel(pl.LightningModule):
         return optimizer
 
     def _configure_scheduler(self, optimizer):
-        return None;
+        return None
