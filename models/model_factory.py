@@ -79,9 +79,8 @@ predefined_trainable_layers = {
     },
     "efficientnet_b0": {
         'classifier': lambda model: [model.classifier],
-        # first and second are not working yet
-        'first': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10],
-        'second': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10, model.features.denseblock4.denselayer9, model.features.denseblock4.denselayer8, model.features.denseblock4.denselayer7, model.features.denseblock4.denselayer6],
+        'first': lambda model: [model.classifier, model.bn2, model.conv_head, model.blocks[6][0].bn3, model.blocks[6][0].conv_pwl],
+        'second': lambda model: [model.classifier, model.bn2, model.conv_head, model.blocks[6]],
     },
 }
 
