@@ -43,22 +43,25 @@ class PlotLearningCurvesCallback(pl.Callback):
             self.state['val_accs'].append(val_acc)
 
     def on_fit_end(self, trainer, pl_module):
-        plt.rc('xtick',labelsize=14)
-        plt.rc('ytick',labelsize=14)
-        plt.title('Training and validation loss and accuracy',fontsize="18")
         # Plot results after trainind ends
+        plt.rc('xtick',labelsize=13)
+        plt.rc('ytick',labelsize=13)
+
         plt.figure(figsize=(20, 6))
         _ = plt.subplot(1,2,1)
         plt.plot(np.arange(trainer.max_epochs) + 1, self.state['train_losses'], 'o-', linewidth=3)
         plt.plot(np.arange(trainer.max_epochs) + 1, self.state['val_losses'], 'o-', linewidth=3)
-        _ = plt.legend(['Train', 'Validation'])
-        plt.grid('on'), plt.xlabel('Epoch'), plt.ylabel('Loss')
+        _ = plt.legend(['Train', 'Validation'], fontsize=12.5)
+        plt.grid('on'), plt.xlabel('Epoch',fontsize=17), plt.ylabel('Loss',fontsize=17)
+        plt.title('Training and validation loss',fontsize="19")
 
         _ = plt.subplot(1,2,2)
         plt.plot(np.arange(trainer.max_epochs) + 1, self.state['train_accs'], 'o-', linewidth=3)
         plt.plot(np.arange(trainer.max_epochs) + 1, self.state['val_accs'], 'o-', linewidth=3)
-        _ = plt.legend(['Train', 'Validation'], fontsize=12)
-        plt.grid('on'), plt.xlabel('Epoch', fontsize=16), plt.ylabel('Accuracy',fontsize=16)
+        _ = plt.legend(['Train', 'Validation'], fontsize=12.5)
+        plt.grid('on'), plt.xlabel('Epoch', fontsize=17), plt.ylabel('Accuracy',fontsize=17)
+        plt.title('Training and validation accuracy',fontsize="19")
+        plt.savefig(os.path.join(trainer.logger.log_dir,'learning_curves.pdf'))
         plt.show()
 
     def load_state_dict(self, state_dict):
