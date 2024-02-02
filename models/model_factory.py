@@ -8,7 +8,7 @@ config = {
     'batch_size': 128,
     'val_split': 0.1,
     'lr': 1e-3,
-    'n_epochs': 10,
+    'n_epochs': 20,
     'image_size': None,
     'mean': None,
     'std': None
@@ -17,7 +17,7 @@ config = {
 def get_model(pretrained_model_name, classifier_fn, layers_version, trainable_layers=None, n_epochs=10):
 
     def set_classifier():
-        if pretrained_model_name in ["xception", "resnet50"]:
+        if pretrained_model_name in ["xception", "resnet50", "inception_v3"]:
             model.fc = classifier_fn(model.fc.in_features)
         else:
             model.classifier = classifier_fn(model.classifier.in_features)
@@ -67,6 +67,13 @@ predefined_trainable_layers = {
     },
     "densenet121": {
         'classifier': lambda model: [model.classifier],
+        'first': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10],
+        'second': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10, model.features.denseblock4.denselayer9, model.features.denseblock4.denselayer8, model.features.denseblock4.denselayer7, model.features.denseblock4.denselayer6],
+    },
+
+    "inception_v3": {
+        'classifier': lambda model: [model.fc],
+        # first and second are not working yet
         'first': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10],
         'second': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10, model.features.denseblock4.denselayer9, model.features.denseblock4.denselayer8, model.features.denseblock4.denselayer7, model.features.denseblock4.denselayer6],
     }
