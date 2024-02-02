@@ -26,9 +26,10 @@ val_dir = data_dir + "/val/"
 test_dir = data_dir + "/test/"
 
 class PneumoniaDataModule(pl.LightningDataModule):
-    def __init__(self, h):
+    def __init__(self, h, transform):
         super().__init__()
         self.h = h
+        self.transform = transform
 
     def setup(self, stage=None):
         #transforms_train = T.Compose([
@@ -45,14 +46,16 @@ class PneumoniaDataModule(pl.LightningDataModule):
             #T.Normalize(mean=self.h['mean'], std=self.h['std'])
           #])
 
-        transforms_train = T.Compose([
-            T.RandomResizedCrop(size=(self.h["image_size"], self.h["image_size"]), scale=(0.8, 1.0)), # I am not sure if this is a good idea, maybe we should just resize. 
-            T.RandomRotation(degrees=15), 
-            T.ColorJitter(), 
-            T.RandomHorizontalFlip(), 
-            T.ToTensor(), 
-            T.Normalize(mean=self.h['mean'], std=self.h['std'])
-        ]) 
+        #transforms_train = T.Compose([
+         #   T.RandomResizedCrop(size=(self.h["image_size"], self.h["image_size"]), scale=(0.8, 1.0)), # I am not sure if this is a good idea, maybe we should just resize. 
+          #  T.RandomRotation(degrees=15), 
+           # T.ColorJitter(), 
+            #T.RandomHorizontalFlip(), 
+            #T.ToTensor(), 
+            #T.Normalize(mean=self.h['mean'], std=self.h['std'])
+        #])
+
+        transforms_train = self.transform
 
         transforms_val = T.Compose([
             T.Resize(size=(self.h["image_size"], self.h["image_size"])),
