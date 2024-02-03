@@ -3,23 +3,39 @@ import numpy as np
 import os
 import random
 from torch.utils.data import WeightedRandomSampler
+import pandas as pd
+
+def retrieve_metrics(checkpoint_path,version):
+    metrics_path = os.path.join(checkpoint_path,"logs", "version_"+str(version), "metrics.csv")
+    df = pd.read_csv(metrics_path)
+    return df['train_loss_epoch'].dropna(), df['train_acc_epoch'].dropna(), df['val_loss_epoch'].dropna(), df['val_acc_epoch'].dropna()
 
 
-def plot_results(n_epochs, train_losses, train_accs, valid_losses, valid_accs):
-  N_EPOCHS = n_epochs
-  # Plot results
-  plt.figure(figsize=(20, 6))
-  _ = plt.subplot(1,2,1)
-  plt.plot(np.arange(N_EPOCHS) + 1, train_losses, 'o-', linewidth=3)
-  plt.plot(np.arange(N_EPOCHS) + 1, valid_losses, 'o-', linewidth=3)
-  _ = plt.legend(['Train', 'Validation'])
-  plt.grid('on'), plt.xlabel('Epoch'), plt.ylabel('Loss')
+def plot_results(checkpoint_path, version):
+    train_losses, train_accs, val_losses, val_accs = retrieve_metrics(checkpoint_path,version)
 
-  _ = plt.subplot(1,2,2)
-  plt.plot(np.arange(N_EPOCHS)+1, train_accs, 'o-', linewidth=3)
-  plt.plot(np.arange(N_EPOCHS)+1, valid_accs, 'o-', linewidth=3)
-  _ = plt.legend(['Train', 'Validation'])
-  plt.grid('on'), plt.xlabel('Epoch'), plt.ylabel('Accuracy')
+    n_epochs = len(train_losses)
+    
+    # Plot results after trainind ends
+    plt.rc('xtick',labelsize=13)
+    plt.rc('ytick',labelsize=13)
+
+    plt.figure(figsize=(20, 6))
+    _ = plt.subplot(1,2,1)
+    plt.plot(np.arange(n_epochs) + 1, train_losses, 'o-', linewidth=3)
+    plt.plot(np.arange(n_epochs) + 1, val_losses, 'o-', linewidth=3)
+    _ = plt.legend(['Train', 'Validation'], fontsize=12.5)
+    plt.grid('on'), plt.xlabel('Epoch',fontsize=17), plt.ylabel('Loss',fontsize=17)
+    plt.title('Training and validation loss',fontsize="19")
+
+    _ = plt.subplot(1,2,2)
+    plt.plot(np.arange(n_epochs) + 1, train_accs, 'o-', linewidth=3)
+    plt.plot(np.arange(n_epochs) + 1, val_accs, 'o-', linewidth=3)
+    _ = plt.legend(['Train', 'Validation'], fontsize=12.5)
+    plt.grid('on'), plt.xlabel('Epoch', fontsize=17), plt.ylabel('Accuracy',fontsize=17)
+    plt.title('Training and validation accuracy',fontsize="19")
+    #plt.savefig(os.path.join(trainer.logger.log_dir,'learning_curves.pdf'))
+    plt.show()
 
 
 def extract_patient_ids(filename):
