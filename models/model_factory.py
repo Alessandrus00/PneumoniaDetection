@@ -64,6 +64,7 @@ predefined_trainable_layers = {
         'classifier': lambda model: [model.fc],
         'first': lambda model: [model.fc, model.layer4[2].bn3, model.layer4[2].conv3, model.layer4[2].bn2, model.layer4[2].conv2],
         'second': lambda model: [model.fc, model.layer4[2].bn3, model.layer4[2].conv3, model.layer4[2].bn2, model.layer4[2].conv2, model.layer4[2].bn1, model.layer4[2].conv1, model.layer4[1].bn3, model.layer4[1].conv3],
+        'all': lambda model: [model]
     },
     "densenet121": {
         'classifier': lambda model: [model.classifier],
