@@ -5,30 +5,24 @@ import random
 from torch.utils.data import WeightedRandomSampler
 import pandas as pd
 
-def retrieve_metrics(checkpoint_path,version):
+def retrieve_metrics(checkpoint_path):
     directory_path = os.path.join(checkpoint_path,"logs")
     entries = os.listdir(directory_path)
     # Filter out only the subdirectories
     versions = [entry for entry in entries if os.path.isdir(os.path.join(directory_path, entry))]
     df_list = []
     for version in versions:
-        for entry in os.scandir(os.path.join(directory_path, version)):
-            if entry.name == 'metrics.csv':
-                csv_path = os.path.join(directory_path, version, entry.name)
-                df_list.append(pd.read_csv(csv_path))
-    
-    for df in df_list:
-        if pd.isna(df.at[-1, -1]):
-            epoch = df.at[-1, 0]
-            df = df[df['epoch'] < epoch]
+        metrics_path = os.path.join(directory_path, version, "metrics.csv")
+        if os.path.isfile(metrics_path):
+            df_list.append(pd.read_csv(metrics_path))
     
     df = pd.concat(df_list)
 
     return df['train_loss_epoch'].dropna(), df['train_acc_epoch'].dropna(), df['val_loss_epoch'].dropna(), df['val_acc_epoch'].dropna()
 
 
-def plot_results(checkpoint_path, version):
-    train_losses, train_accs, val_losses, val_accs = retrieve_metrics(checkpoint_path,version)
+def plot_results(checkpoint_path):
+    train_losses, train_accs, val_losses, val_accs = retrieve_metrics(checkpoint_path)
 
     n_epochs = len(train_losses)
     
