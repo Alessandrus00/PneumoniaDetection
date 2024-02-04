@@ -83,6 +83,7 @@ predefined_trainable_layers = {
         'classifier': lambda model: [model.classifier],
         'first': lambda model: [model.classifier, model.bn2, model.conv_head, model.blocks[6][0].bn3, model.blocks[6][0].conv_pwl],
         'second': lambda model: [model.classifier, model.bn2, model.conv_head, model.blocks[6]],
+        'all': lambda model: [model]
     },
 }
 
