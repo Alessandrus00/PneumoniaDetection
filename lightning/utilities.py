@@ -6,8 +6,24 @@ from torch.utils.data import WeightedRandomSampler
 import pandas as pd
 
 def retrieve_metrics(checkpoint_path,version):
-    metrics_path = os.path.join(checkpoint_path,"logs", "version_"+str(version), "metrics.csv")
-    df = pd.read_csv(metrics_path)
+    directory_path = os.path.join(checkpoint_path,"logs")
+    entries = os.listdir(directory_path)
+    # Filter out only the subdirectories
+    versions = [entry for entry in entries if os.path.isdir(os.path.join(directory_path, entry))]
+    df_list = []
+    for version in versions:
+        for entry in os.scandir(os.path.join(directory_path, version)):
+            if entry.name == 'metrics.csv':
+                csv_path = os.path.join(directory_path, version, entry.name)
+                df_list.append(pd.read_csv(csv_path))
+    
+    for df in df_list:
+        if pd.isna(df.at[-1, -1]):
+            epoch = df.at[-1, 0]
+            df = df[df['epoch'] < epoch]
+    
+    df = pd.concat(df_list)
+
     return df['train_loss_epoch'].dropna(), df['train_acc_epoch'].dropna(), df['val_loss_epoch'].dropna(), df['val_acc_epoch'].dropna()
 
 

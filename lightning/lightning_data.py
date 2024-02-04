@@ -82,7 +82,7 @@ class PneumoniaDataModule(pl.LightningDataModule):
             A.Resize(height=self.h["image_size"], width=self.h["image_size"]),
             A.Normalize(mean=list(self.h['mean']), std=list(self.h['std'])),
             ToTensorV2()
-        ])        
+        ])    
 
 
         data_transforms_val_alb = A.Compose([

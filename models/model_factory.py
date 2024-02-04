@@ -5,7 +5,7 @@ import torch.nn as nn
 
 # default training configuration
 config = {
-    'batch_size': 128,
+    'batch_size': 64,
     'val_split': 0.1,
     'lr': 1e-3,
     'n_epochs': 20,
