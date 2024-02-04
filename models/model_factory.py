@@ -69,6 +69,7 @@ predefined_trainable_layers = {
         'classifier': lambda model: [model.classifier],
         'first': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10],
         'second': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10, model.features.denseblock4.denselayer9, model.features.denseblock4.denselayer8, model.features.denseblock4.denselayer7, model.features.denseblock4.denselayer6],
+        'all': lambda model: [model]
     },
 
     "inception_v3": {
