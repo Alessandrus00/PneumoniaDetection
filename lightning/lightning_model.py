@@ -20,11 +20,11 @@ import pytorch_lightning as pl
 import logging
 
 class PneumoniaModel(pl.LightningModule):
-    def __init__(self, h, model):
+    def __init__(self, h, model, classes_weight=[1.0, 1.0]):
         super().__init__()
         self.h = h
         self.model = model
-        self.criterion = nn.NLLLoss()
+        self.criterion = nn.NLLLoss(weight=classes_weight)
         self.test_outputs = []
 
 
