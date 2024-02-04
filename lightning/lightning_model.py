@@ -20,7 +20,7 @@ import pytorch_lightning as pl
 import logging
 
 class PneumoniaModel(pl.LightningModule):
-    def __init__(self, h, model, classes_weight=[1.0, 1.0]):
+    def __init__(self, h, model, classes_weight=torch.tensor([1.0, 1.0])):
         super().__init__()
         self.h = h
         self.model = model
@@ -62,7 +62,7 @@ class PneumoniaModel(pl.LightningModule):
         preds = torch.argmax(outputs, dim=1)
         self.test_outputs.append({"test_loss": loss, "test_acc": acc, "preds": preds, "labels": labels})
         return {"test_loss": loss, "test_acc": acc, "preds": preds, "labels": labels}
-
+    
     def on_test_epoch_end(self):
         # compute test metrics
         test_loss_mean = torch.stack([x["test_loss"] for x in self.test_outputs]).mean()
