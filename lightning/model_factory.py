@@ -52,10 +52,10 @@ def set_trainable_layers(model, trainable_layers):
             param.requires_grad = True
 
     total_params = sum(p.numel() for p in model.parameters())
-    print(f'{total_params:,} total parameters.')
+    #print(f'{total_params:,} total parameters.')
 
     total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f'{total_trainable_params:,} trainable parameters.')
+    #print(f'{total_trainable_params:,} trainable parameters.')
 
 
 # Define a dictionary with functions returning predefined trainable layers for each model and version
