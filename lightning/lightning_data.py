@@ -47,57 +47,37 @@ class PneumoniaDataModule(pl.LightningDataModule):
     def __init__(self, h):
         super().__init__()
         self.h = h
-        #self.transform = transform
 
     def setup(self, stage=None):
-        #transforms_train = T.Compose([
-            #T.RandomRotation(20),  # Randomly rotate the image within a range of (-20, 20) degrees
-         #   T.RandomRotation(15),  # Randomly rotate the image within a range of (-20, 20) degrees
-            #T.RandomHorizontalFlip(p=0.5),  # Randomly flip the image horizontally with 50% probability
-          #  T.RandomHorizontalFlip(),  # Randomly flip the image horizontally with 50% probability
-           # T.RandomResizedCrop(size=(299,299), scale=(0.8, 1.0)),  # Randomly crop the image and resize it
-            #T.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),  # Randomly change the brightness, contrast, saturation, and hue
-            #T.RandomApply([T.RandomAffine(0, translate=(0.1, 0.1))], p=0.5),  # Randomly apply affine transformations with translation
-            #T.RandomApply([T.RandomPerspective(distortion_scale=0.2)], p=0.5),
-            #T.Resize(size=(self.h["image_size"], self.h["image_size"])),
-            #T.ToTensor(),
-            #T.Normalize(mean=self.h['mean'], std=self.h['std'])
-          #])
-
-        #transforms_train = T.Compose([
-         #   T.RandomResizedCrop(size=(self.h["image_size"], self.h["image_size"]), scale=(0.8, 1.0)), # I am not sure if this is a good idea, maybe we should just resize. 
-          #  T.RandomRotation(degrees=15), 
-           # T.ColorJitter(), 
-            #T.RandomHorizontalFlip(), 
-            #T.ToTensor(), 
-            #T.Normalize(mean=self.h['mean'], std=self.h['std'])
-        #])
-
-        data_transforms_train_alb = A.Compose([
-            A.Rotate(limit=20),
-            A.HorizontalFlip(p=0.5),
-            A.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1, p=1),
-            A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0, rotate_limit=0, p=0.5),
-            A.Perspective(scale=(0.05, 0.15), keep_size=True, p=0.5),
-            A.Resize(height=self.h["image_size"], width=self.h["image_size"]),
-            A.Normalize(mean=list(self.h['mean']), std=list(self.h['std'])),
-            ToTensorV2()
-        ])    
-
+        
+        if self.h['augmentation'] == 'normal':
+            # normal augmentation
+            data_transforms_train_alb = A.Compose([
+                A.Rotate(limit=20),
+                A.HorizontalFlip(p=0.5),
+                A.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1, p=1), 
+                A.Resize(height=self.h["image_size"], width=self.h["image_size"]),
+                A.Normalize(mean=list(self.h['mean']), std=list(self.h['std'])),
+                ToTensorV2()
+            ])
+        else:
+            # strong augmentation
+            data_transforms_train_alb = A.Compose([
+                A.Rotate(limit=20),
+                A.HorizontalFlip(p=0.5),
+                A.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1, p=1),
+                A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0, rotate_limit=0, p=0.5),
+                A.Perspective(scale=(0.05, 0.15), keep_size=True, p=0.5),
+                A.Resize(height=self.h["image_size"], width=self.h["image_size"]),
+                A.Normalize(mean=list(self.h['mean']), std=list(self.h['std'])),
+                ToTensorV2()
+            ])
 
         data_transforms_val_alb = A.Compose([
             A.Resize(self.h["image_size"], self.h["image_size"]),
             A.Normalize(mean=list(self.h['mean']), std=list(self.h['std'])),
             ToTensorV2(),
         ])
-
-        #transforms_train = self.transform
-
-        #transforms_val = T.Compose([
-         #   T.Resize(size=(self.h["image_size"], self.h["image_size"])),
-          #  T.ToTensor(),
-           # T.Normalize(mean=self.h['mean'], std=self.h['std']),
-        #])
 
         train_filenames, val_filenames = utilities.split_file_names(train_dir, self.h['val_split'])
 

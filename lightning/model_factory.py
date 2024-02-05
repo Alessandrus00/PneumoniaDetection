@@ -1,23 +1,11 @@
 # This module creates models for our experiments.
 import timm
-import model_functions
 import torch.nn as nn
 
-# default training configuration
-config = {
-    'batch_size': 64,
-    'val_split': 0.1,
-    'lr': 1e-3,
-    'n_epochs': 20,
-    'image_size': None,
-    'mean': None,
-    'std': None
-    }
-
-def get_model(pretrained_model_name, classifier_fn, layers_version, trainable_layers=None, n_epochs=10):
+def get_model(pretrained_model_name, classifier_fn, layers_version, trainable_layers=None):
 
     def set_classifier():
-        if pretrained_model_name in ["xception", "resnet50", "inception_v3"]:
+        if pretrained_model_name in ["xception", "resnet50"]:
             model.fc = classifier_fn(model.fc.in_features)
         else:
             model.classifier = classifier_fn(model.classifier.in_features)
@@ -25,17 +13,17 @@ def get_model(pretrained_model_name, classifier_fn, layers_version, trainable_la
     model = timm.create_model(pretrained_model_name, pretrained=True)
     set_classifier()
 
-    config['mean'] = model.default_cfg['mean']
-    config['std'] = model.default_cfg['std']
-    config['image_size'] = model.default_cfg['input_size'][1]
-    config['n_epochs'] = n_epochs
+    img_config = dict()
+    img_config['mean'] = model.default_cfg['mean']
+    img_config['std'] = model.default_cfg['std']
+    img_config['image_size'] = model.default_cfg['input_size'][1]
 
     if trainable_layers is None:
         trainable_layers = predefined_trainable_layers[pretrained_model_name][layers_version](model)
 
-    model_functions.set_trainable_layers(model, trainable_layers)
+    set_trainable_layers(model, trainable_layers)
 
-    return model, config
+    return model, img_config
 
 def get_linear_classifer(n_inputs, num_classes=2):
     return nn.Sequential(
@@ -53,13 +41,32 @@ def get_simple_non_linear_classifier(n_inputs, num_classes=2):
     nn.LogSoftmax(dim=1) 
 )
 
+# Accepts a list of trainable layers. Makes sure that only these layers are not frozen.
+def set_trainable_layers(model, trainable_layers):
+    
+    for param in model.parameters():
+        param.requires_grad = False
+
+    for layer in trainable_layers:
+        for param in layer.parameters():
+            param.requires_grad = True
+
+    total_params = sum(p.numel() for p in model.parameters())
+    print(f'{total_params:,} total parameters.')
+
+    total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f'{total_trainable_params:,} trainable parameters.')
+
+
 # Define a dictionary with functions returning predefined trainable layers for each model and version
 predefined_trainable_layers = {
     "xception": {
         'classifier': lambda model: [model.fc],
         'first': lambda model: [model.fc, model.bn4, model.conv4],
         'second': lambda model: [model.fc, model.bn4, model.conv4, model.bn3, model.conv3],
+        'all': lambda model: [model]
     },
+
     "resnet50": {
         'classifier': lambda model: [model.fc],
         'first': lambda model: [model.fc, model.layer4[2].bn3, model.layer4[2].conv3, model.layer4[2].bn2, model.layer4[2].conv2],
@@ -73,12 +80,6 @@ predefined_trainable_layers = {
         'all': lambda model: [model]
     },
 
-    "inception_v3": {
-        'classifier': lambda model: [model.fc],
-        # first and second are not working yet
-        'first': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10],
-        'second': lambda model: [model.classifier, model.features.norm5, model.features.denseblock4.denselayer16, model.features.denseblock4.denselayer15, model.features.denseblock4.denselayer14, model.features.denseblock4.denselayer13, model.features.denseblock4.denselayer12, model.features.denseblock4.denselayer11, model.features.denseblock4.denselayer10, model.features.denseblock4.denselayer9, model.features.denseblock4.denselayer8, model.features.denseblock4.denselayer7, model.features.denseblock4.denselayer6],
-    },
     "efficientnet_b0": {
         'classifier': lambda model: [model.classifier],
         'first': lambda model: [model.classifier, model.bn2, model.conv_head, model.blocks[6][0].bn3, model.blocks[6][0].conv_pwl],

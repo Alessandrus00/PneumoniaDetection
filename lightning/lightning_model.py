@@ -18,19 +18,21 @@ import pprint
 import timm
 import pytorch_lightning as pl
 import logging
+import model_factory
 
 class PneumoniaModel(pl.LightningModule):
-    def __init__(self, h, model, classes_weight=torch.tensor([1.0, 1.0])):
+    def __init__(self, h):
         super().__init__()
         self.h = h
-        self.model = model
-        self.criterion = nn.NLLLoss(weight=classes_weight)
+        self.model, self.img_conf = model_factory.get_model(self.h['model_name'], self.h['classifier_type'], self.h['layers'])
+        self.h['image_size'] = self.img_conf['image_size']
+        self.h['mean'] = self.img_conf['mean']
+        self.h['std'] = self.img_conf['std']
+        self.criterion = nn.NLLLoss(weight=self.h['classes_weight'])
         self.test_outputs = []
-
 
     def forward(self, x):
         return self.model(x)
-
 
     def training_step(self, batch, batch_idx):
         inputs, labels = batch
@@ -62,7 +64,7 @@ class PneumoniaModel(pl.LightningModule):
         preds = torch.argmax(outputs, dim=1)
         self.test_outputs.append({"test_loss": loss, "test_acc": acc, "preds": preds, "labels": labels})
         return {"test_loss": loss, "test_acc": acc, "preds": preds, "labels": labels}
-    
+
     def on_test_epoch_end(self):
         # compute test metrics
         test_loss_mean = torch.stack([x["test_loss"] for x in self.test_outputs]).mean()
@@ -77,8 +79,45 @@ class PneumoniaModel(pl.LightningModule):
         self.test_acc = test_acc_mean.cpu().numpy()
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters())
-        return optimizer
+        optimizer = self._configure_optimizer()
+        scheduler_dic = self._configure_scheduler(optimizer)
 
+        if (scheduler_dic["scheduler"]):
+            return {
+                "optimizer": optimizer,
+                "lr_scheduler": scheduler_dic
+            }            
+        else:
+            return optimizer
+
+    def _configure_optimizer(self):
+        if self.h['optimizer'] == 'SGD':
+            return torch.optim.SGD(self.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0001)
+
+        return torch.optim.Adam(self.parameters())
+        
     def _configure_scheduler(self, optimizer):
+        if self.h['scheduler'] == "":
+            return {
+                'scheduler': None
+            }
+        if(self.h['scheduler'] == 'CosineAnnealingLR10'):
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=self.h["n_epochs"], eta_min=0.001*0.1)
+            return {
+                "scheduler": scheduler,
+                "interval": "epoch"
+            }
+
+        print ("Error. scheduler name not valid! '{scheduler_name}'")
         return None
+
+
+
+
+
+
+
+
+
+
+
