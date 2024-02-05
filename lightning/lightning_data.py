@@ -80,8 +80,7 @@ class PneumoniaDataModule(pl.LightningDataModule):
         ])
 
         if self.h['ensemble']:
-           pneumonia_train_filenames, normal_train_filenames, meta_filenames = utilities.split_file_names_meta(train_dir,n_samples=70)
-           #print(len(pneumonia_train_filenames), len(normal_train_filenames), len(meta_filenames))
+           pneumonia_train_filenames, normal_train_filenames, meta_filenames = utilities.split_file_names_meta(train_dir)
            train_filenames = pneumonia_train_filenames + normal_train_filenames
            train_filenames, val_filenames =  utilities.split_file_names2(pneumonia_train_filenames, normal_train_filenames, self.h['val_split'])
     

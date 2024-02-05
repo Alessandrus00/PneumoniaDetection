@@ -53,13 +53,11 @@ def extract_patient_ids(filename):
     return patient_id
 
 
-def split_file_names_meta(input_folder,n_samples=200):
+def split_file_names_meta(input_folder):
     random.seed(27)
     pneumonia_patient_ids = set([extract_patient_ids(fn) for fn in os.listdir(os.path.join(input_folder, 'PNEUMONIA'))])
-    pneumonia_meta_patient_ids = random.sample(pneumonia_patient_ids, int(45))
+    pneumonia_meta_patient_ids = random.sample(pneumonia_patient_ids, 45)
     
-    print(len(pneumonia_meta_patient_ids))
-
     pneumonia_train_filenames = []
     pneumonia_meta_filenames = []
 
@@ -69,17 +67,12 @@ def split_file_names_meta(input_folder,n_samples=200):
             pneumonia_meta_filenames.append(os.path.join(input_folder, 'PNEUMONIA', filename))
         else:
             pneumonia_train_filenames.append(os.path.join(input_folder, 'PNEUMONIA', filename))
-    
-    print(len(pneumonia_meta_filenames))
-    
+        
     # Normal (by file, no patient information in file names)
     normal_filenames  = [os.path.join(input_folder, 'NORMAL', fn) for fn in os.listdir(os.path.join(input_folder, 'NORMAL'))]
     random.seed(27)
-    normal_meta_filenames = random.sample(normal_filenames, int(100))
+    normal_meta_filenames = random.sample(normal_filenames, 100)
     normal_train_filenames = list(set(normal_filenames)-set(normal_meta_filenames))
-
-    #print(pneumonia_meta_patient_ids)
-
 
     meta_filenames = pneumonia_meta_filenames + normal_meta_filenames
 
