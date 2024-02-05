@@ -53,6 +53,51 @@ def extract_patient_ids(filename):
     return patient_id
 
 
+def split_file_names_meta(input_folder,n_samples=200):
+    random.seed(27)
+    pneumonia_patient_ids = set([extract_patient_ids(fn) for fn in os.listdir(os.path.join(input_folder, 'PNEUMONIA'))])
+    pneumonia_meta_patient_ids = random.sample(pneumonia_patient_ids, int(45))
+    
+    print(len(pneumonia_meta_patient_ids))
+
+    pneumonia_train_filenames = []
+    pneumonia_meta_filenames = []
+
+    for filename in os.listdir(os.path.join(input_folder, 'PNEUMONIA')):
+        patient_id = extract_patient_ids(filename)
+        if patient_id in pneumonia_meta_patient_ids:
+            pneumonia_meta_filenames.append(os.path.join(input_folder, 'PNEUMONIA', filename))
+        else:
+            pneumonia_train_filenames.append(os.path.join(input_folder, 'PNEUMONIA', filename))
+    
+    print(len(pneumonia_meta_filenames))
+    
+    # Normal (by file, no patient information in file names)
+    normal_filenames  = [os.path.join(input_folder, 'NORMAL', fn) for fn in os.listdir(os.path.join(input_folder, 'NORMAL'))]
+    random.seed(27)
+    normal_meta_filenames = random.sample(normal_filenames, int(100))
+    normal_train_filenames = list(set(normal_filenames)-set(normal_meta_filenames))
+
+    #print(pneumonia_meta_patient_ids)
+
+
+    meta_filenames = pneumonia_meta_filenames + normal_meta_filenames
+
+    return pneumonia_train_filenames, normal_train_filenames, meta_filenames
+
+
+def split_file_names2(pneumonia_train_filenames, normal_train_filenames, val_split_perc):
+    pneumonia_val_filenames = random.sample(pneumonia_train_filenames, int(val_split_perc*len(pneumonia_train_filenames)))
+    pneumonia_train_filenames = list(set(pneumonia_train_filenames) - set(pneumonia_val_filenames))
+
+    normal_val_filenames = random.sample(normal_train_filenames, int(val_split_perc*len(normal_train_filenames)))
+    normal_train_filenames = list(set(normal_train_filenames) - set(normal_val_filenames))
+
+    return (pneumonia_train_filenames + normal_train_filenames), (pneumonia_val_filenames + normal_val_filenames)
+
+
+
+
 def split_file_names(input_folder, val_split_perc):
     # Pneumonia files contain patient id, so we group split them by patient to avoid data leakage
     pneumonia_patient_ids = set([extract_patient_ids(fn) for fn in os.listdir(os.path.join(input_folder, 'PNEUMONIA'))])
