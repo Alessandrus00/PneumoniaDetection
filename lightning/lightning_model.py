@@ -107,6 +107,15 @@ class PneumoniaModel(pl.LightningModule):
                 "scheduler": scheduler,
                 "interval": "epoch"
             }
+        
+        if (self.h['scheduler'] == "ReduceLROnPlateau5"):
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5, verbose=True)
+            return {
+                "scheduler": scheduler,
+                "interval": "epoch",
+                "monitor": "val_acc",
+                "strict": True
+            }
 
         print ("Error. scheduler name not valid! '{scheduler_name}'")
         return None
