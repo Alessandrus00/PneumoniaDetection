@@ -79,11 +79,19 @@ class PneumoniaDataModule(pl.LightningDataModule):
             ToTensorV2(),
         ])
 
-        train_filenames, val_filenames = utilities.split_file_names(train_dir, self.h['val_split'])
+        if self.h['ensemble']:
+           pneumonia_train_filenames, normal_train_filenames, meta_filenames = utilities.split_file_names_meta(train_dir)
+           train_filenames = pneumonia_train_filenames + normal_train_filenames
+           train_filenames, val_filenames =  utilities.split_file_names2(pneumonia_train_filenames, normal_train_filenames, self.h['val_split'])
+    
+           self.meta_set = CustomImageFolder(train_dir, transform=data_transforms_val_alb, is_valid_file=lambda x: x in meta_filenames)
+        else:
+            train_filenames, val_filenames = utilities.split_file_names(train_dir, self.h['val_split'])
 
         self.train_set = CustomImageFolder(train_dir, transform=data_transforms_train_alb, is_valid_file=lambda x: x in train_filenames)
         self.val_set = CustomImageFolder(train_dir, transform=data_transforms_val_alb, is_valid_file=lambda x: x in val_filenames)
         self.test_set = CustomImageFolder(test_dir, transform=data_transforms_val_alb)
+
 
     def train_dataloader(self):
         sampler = utilities.create_weighted_sampler(self.train_set)
