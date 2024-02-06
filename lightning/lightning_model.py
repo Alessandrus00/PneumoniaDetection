@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms as T
 from torch.utils.data import random_split
 from torch.utils.data import WeightedRandomSampler
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from tqdm.auto import tqdm
 import time
@@ -59,11 +59,12 @@ class PneumoniaModel(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         inputs, labels = batch
         outputs = self(inputs)
+        probs = torch.exp(outputs)
         loss = self.criterion(outputs, labels)
         acc = (outputs.argmax(dim=1) == labels).float().mean()
         preds = torch.argmax(outputs, dim=1)
-        self.test_outputs.append({"test_loss": loss, "test_acc": acc, "preds": preds, "labels": labels})
-        return {"test_loss": loss, "test_acc": acc, "preds": preds, "labels": labels}
+        self.test_outputs.append({"test_loss": loss, "test_acc": acc, "preds": preds, "labels": labels, 'probs': probs})
+        return {"test_loss": loss, "test_acc": acc, "preds": preds, "labels": labels, 'probs': probs}
 
     def on_test_epoch_end(self):
         # compute test metrics
@@ -72,11 +73,13 @@ class PneumoniaModel(pl.LightningModule):
 
         self.test_predicted_labels = torch.cat([x["preds"] for x in self.test_outputs], dim=0).cpu().numpy()
         self.test_true_labels = torch.cat([x["labels"] for x in self.test_outputs], dim=0).cpu().numpy()
+        self.test_probs = torch.cat([x["probs"] for x in self.test_outputs], dim=0).cpu().numpy()[:,1]
 
         self.test_precision = precision_score(self.test_true_labels, self.test_predicted_labels)
         self.test_recall = recall_score(self.test_true_labels, self.test_predicted_labels)
         self.test_f1 = f1_score(self.test_true_labels, self.test_predicted_labels)
         self.test_acc = test_acc_mean.cpu().numpy()
+        self.test_auc = roc_auc_score(self.test_true_labels, self.test_probs)
 
     def configure_optimizers(self):
         optimizer = self._configure_optimizer()
