@@ -1,2 +1,2 @@
 # PneumoniaDetection
-Evaluation of different CNN models for the Pneumonia detection task on the Chest X-Ray dataset.
+Evaluation of different CNN models for the pneumonia detection task on a pediatric chest X-ray dataset.
