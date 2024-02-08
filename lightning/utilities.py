@@ -44,7 +44,7 @@ def plot_results(checkpoint_path):
     _ = plt.legend(['Train', 'Validation'], fontsize=12.5)
     plt.grid('on'), plt.xlabel('Epoch', fontsize=17), plt.ylabel('Accuracy',fontsize=17)
     plt.title('Training and validation accuracy',fontsize="19")
-    #plt.savefig(os.path.join(trainer.logger.log_dir,'learning_curves.pdf'))
+    #plt.savefig(os.path.join('learning_curves.pdf'))
     plt.show()
 
 
