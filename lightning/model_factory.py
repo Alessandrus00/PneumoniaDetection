@@ -87,16 +87,3 @@ predefined_trainable_layers = {
         'all': lambda model: [model]
     },
 }
-
-
-
-    
-
-
-
-
-        
-
-        
-
-
